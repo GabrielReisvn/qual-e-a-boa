@@ -106,3 +106,31 @@ export default function Home() {
 
         return () => sensor.remove();//aqui desligamos o sensor quando a tela for fechada
         }, [opcoes]);
+
+        // PARA REALIZAR TESTE< npx expo start, depois pressione 'a'
+
+        //Agora vamos criar a interface do app, que é o que o usuário vai ver na tela --> JSX
+
+        return (
+            <ScrollView style={style.container} contentContainerStyle={style.conteudo}>
+                <text style={style.titulo}>Qual é a boa? </text>
+                <text style={style.subtitulo}>Monte a lista e chacoalhe!</text>
+
+
+            </ScrollView>
+        );
+
+        const style = StyleSheet.create({
+            container: {
+                flex: 1, // ocupa toda a tela
+                backgroundColor: cores.fundo, // cor de fundo do app
+            },
+            conteudo: { padding: 20, alignItems: 'center' }, // centraliza o conteúdo
+            titulo: {
+                fontSize: 30,
+                fontWeight: 'bold',
+                color: cores.textoPrincipal,
+            },
+            subtitulo: { fontSize: 15, color: cores.textoSecundario, marginTop: 4, marginBottom: 24 },
+        
+        });
