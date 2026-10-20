@@ -1,126 +1,125 @@
-// ================================
-//  Index.js- qual é a boa
-// ================================
+// =====================================
+// index.js - Qual é a boa?
+// =====================================
 
-// Etapa 1: trazer ferramentas {import}
-
-import { Stack, useEffect } from "react";
-
-// view: agrupa e organiza elementos na tela
-// text: exibe texto na tela
-// textInput: campo de digitação
-// pressable: botão que reage ao toque
-// scrollView: permite rolar a tela para cima e para baixo
-// styleSheet: permite criar estilos para os elementos da tela
-
-import { View, Text, TextInput, Pressable, ScrollView, StyleSheet } from "react-native";
-
-import { cores } from "../data/tema";
-import { accelerometer } from "expo-sensors";
+// ETAPA INICIAL - TRAZER A FERRAMENTAS (import)
+import {useState, useEffect } from "react";
+// View -> uma caixa, serve para agrupar e organizar as coisas
+// Text -> Todo texto precisa estar dentro de um <text>
+// TextInput -> um campo para digitar
+// pressable -> qualquer coisa que dá pra tocar: nosso botão
+// StyleSheet -> ferramenta pra escrever os estilos.
+import {View, Text, TextInput, Pressable, ScrollView, StyleSheet } from "react-native";
+import { cores } from "../data/tema"
+import { Accelerometer } from "expo-sensors";
 import * as Haptics from "expo-haptics";
 
-const LIMITE_DE_FORCA = 1.8; // limite de força G para detectar um "shake"
-const TEMPO_ENTRE_SORTEIOS = 1000; // tempo mínimo entre sorteios em milissegundos
+const LIMITE_DE_FORCA = 1.8;
+const TEMPO_ENTRE_SORTEIOS = 1000; //milissegundos: 1000 = 1 segundo
 
+// ETAPA 01 - CRIAR A TELA 
 
-export default function Home() {
-    // começa com 5 opções de comida como estado inicial
-    const [opcoes, setOpcoes] = useState(['pizza', 'hamburguer', 'sushi', 'churrasco', 'salada']);
+export default function Home(){
+    //começa com 3 opçoes para já ter o que sortear
+    const [opcoes, setOpcoes] = useState(["Pizza", "Hambúrger", "Sushi"]);    
+    // A opção que foi sorteada. Começa vazia ("")porque ainda não sorteou
+    const [resultado, setResultado] = useState("");
+    // O que a pessoa está digitando no campo. neste caso começa vazio.
+    const [textoDigitado, setTextoDigitado] = useState("")
 
-    //  A opcao selecionada é armazenada no estado "resultado"
-    const [resultado, setResultado] = useState(''); // resultado do sorteio
-
-    const [textoDigitado, setTextoDigitado] = useState(''); // texto digitado no campo de entrada
-
-    // Função sortear
-
-    function sortear() {
-        if(opcoes.length < 2) {
-            // Não é possível sortear com menos de 2 opções
-            setResultado('Adicione mais opções para sortear!');
+    // FUNÇÃO SORTEAR
+    function sortear(){
+        if (opcoes.length < 2){
+            setResultado("Adcione pelo menos 2 opções!");
             return;
         }
-        // Lógica para sortear uma opção aleatória
-        //1) math.random() - gera um número aleatório entre 0 e 1
-        //2) x opcoes.length - multiplica o número aleatório pelo tamanho do array de opções
-        //3) math.floor() - arredonda para baixo
+
+        // Como sortear uma posição da lista:
+        // 1) Math.random() - número aleatórios entre 0 e 1
+        // 2) x opcoes.length - multiplica pelo tamanho da lista
+        // 3) Math.floor() - arredonda para Baixo
         const posicao = Math.floor(Math.random() * opcoes.length);
 
-        //opcoes[posicao] - pega a opção sorteada do array de opções
+        //opcoes[2] pega o item que está na posição 2 da lista
         const opcaoSorteada = opcoes[posicao];
+        setResultado(opcaoSorteada) //aqui ele guarda no useState a tela atualizada!
 
-        setResultado(opcaoSorteada); //aqui ele guarda o resultado do sorteio no estado "resultado"
-
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); // vibração de sucesso
+        //aqui faz o celular vibrar avisando que saiu o resultado
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
     }
 
-    //função de adicionar opção
-    function adicionar() {
-
-        //.trim() - retira espaços em branco do início e do fim da string
+    //FUNÇÃO DE ADCIONAR UMA OPÇÃO
+    function adicionar(){
+        //trim: retira os espaços do fim e do começo
         const nome = textoDigitado.trim();
-        if (nome === '') {
-            // não adiciona se o campo estiver vazio
-            return;
-        }
-        const listaNova = [...opcoes, nome]; // cria uma nova lista com a opção adicionada
-        setOpcoes(listaNova);
-        setTextoDigitado(''); // limpa o campo de entrada
+
+        if (nome === "") {
+            return; //campo vazio? ----> Não adiciona NADA!
         }
 
-        //função de remover opção
-        function remover(nomeParaRemover) {
-            const listaNova = opcoes.filter((opcao) => opcao !== nomeParaRemover);
-            setOpcoes(listaNova);
-        
-        }
+        // Aqui criamos uma nova lista, com tudo o que já tinha + o nome novo
+        const listaNova = [...opcoes, nome];
+        setOpcoes(listaNova);
+        setTextoDigitado("");// limpa o campo para digitar a próxima.
     }
 
-        // SORTEAR AO CHOACALHAR
-        // nos vamos usar o useEffect e o sensor
-        //useEffect: 'faça isto e DEPOIS que a tela for renderizada'
-        // usamos para ligar o sensor, e desligar se o app for fechado
+    // FUNÇÃO DE REMOVER UMA OPÇÃO
+    function remover(nomeParaRemover){
+        
+        const listaNova = opcoes.filter((opcao) => opcao !== nomeParaRemover);
+        setOpcoes(listaNova);
+    }
 
-    useEffect( () => {
-        //aqui pede ao sensor para medir a cada 100ms (10x por segundo)
-        accelerometer.setUpdateInterval(100);
+    // SORTEAR AO CHACOALHAR 
+    // Nós vamos usar aqui o useEffect, e o sensor
+    // useEffect = "faça isto DEPOIS que a tela aparecer"
+    // usamos para LIGAR o sensor, e para DELIGAR quando a tela sair
+    useEffect(() =>{
+        //aqui pede ao sensor para medir a cada 100 milisegundos (10x por segundo)
+        Accelerometer.setUpdateInterval(100);
 
-        //guarda a hora do último sorteio para evitar sorteios muito próximos
-        // começa com 0
-        // let (não const) porque vamos mudar o valor depois
-        let ultimaHoraDoSorteio = 0;
+        // Guarda a hora do ultimo sorteio, para não sortear 10 vezes
+        // Começa com zero (numca sorteou)
+        // let (e não const) porque este valor vai mudar
+        let horaDoUltimoSorteio = 0;
 
+        //addlistener = "Me avise toda vez que o sensor medir algo novo"
+        //"dados" chega com as medidas: dados.x, dados.y e dados.z
         const sensor = Accelerometer.addListener((dados) => {
+            //math.hypot junta x, y e z num número só: a FORÇA TOTAL
+            const forca = Math.hypot(dados.x, dados.y, dados.z);
+            const agora = Date.now();
+            const tempoPassado = agora - horaDoUltimoSorteio;
 
-            //add.Listener = 'Me avise quando houver uma nova medição do sensor'
-            //dados: {x, y, z} - valores de aceleração em cada eixo
-            const forca =  Math.hypot *(dados.x, dados.y, dados.z); // calcula a força G total
-
-            const agora = Date.now(); // pega a hora atual em milissegundos
-            const tempoPassado = agora - ultimaHoraDoSorteio; // calcula o tempo passado desde o último sorteio
-            if ( forca > LIMITE_DE_FORCA && tempoPassado > TEMPO_ENTRE_SORTEIOS) {     
-               ultimaHoraDoSorteio = agora;
-                sortear()
+            //1 - chacoalhou forte (forca maior que o limite)
+            //2 - ja passou tempo suficiente desde o ultimo sorteio
+            if (forca > LIMITE_DE_FORCA && tempoPassado > TEMPO_ENTRE_SORTEIOS){
+                horaDoUltimoSorteio = agora;
+                sortear();
             }
+
         });
+        // a função é devolvida aqui é a "LIMPEZA": roda quando a tela sai.
+        // Desliga o sensor (como apagar a luz ao sair do quarto)
+        return () => sensor.remove();
+        //[opcoes] diz: "religue o sensor sempre que a lista mudar"
+    }, [opcoes]);
 
-        return () => sensor.remove();//aqui desligamos o sensor quando a tela for fechada
-        }, [opcoes]);
+    // PARA REALIZAÇÃO DO TESTE npx expo start, depois pressione "a"
+    // https://dontpad.com.br/senai-dsii2sesi
 
-        // PARA REALIZAR TESTE< npx expo start, depois pressione 'a'
+    //AGORA VAMOS COMEÇAR A DESENHA A TELA --> JSX
+    //
 
-        //Agora vamos criar a interface do app, que é o que o usuário vai ver na tela --> JSX
+    return (
+        <ScrollView style={styles.container} contentContainerStyle={styles.conteudo}>
+        <Text style={styles.titulo}>Qual é a boa? 🎲</Text>
+        <Text style={styles.subtitulo}>Monte a lista e chacoalhe o celular</Text>
 
-        return (
-            <ScrollView style={style.container} contentContainerStyle={style.conteudo}>
-                <text style={style.titulo}>Qual é a boa? </text>
-                <text style={style.subtitulo}>Monte a lista e chacoalhe!</text>
-
-
-            </ScrollView>
-        );
-
-        const style = StyleSheet.create({
+        </ScrollView>
+    );
+}
+        const styles = StyleSheet.create({
             container: {
                 flex: 1, // ocupa toda a tela
                 backgroundColor: cores.fundo, // cor de fundo do app
